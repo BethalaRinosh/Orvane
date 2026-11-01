@@ -190,3 +190,8 @@ Use Orvane only on systems and accounts you are authorized to control. Do not us
 ## License
 
 Orvane is licensed under the [MIT License](LICENSE). Third-party dependencies and model weights retain their own licenses.
+
+
+## Original project and attribution
+
+Orvane is currently a rebranded and modified foundation based on [OpenComputer](https://github.com/andykr1k/OpenComputer) by Andrew Krikorian. The original MIT license and copyright notice are preserved in [LICENSE](LICENSE). Orvane-specific changes will be documented as development continues.
