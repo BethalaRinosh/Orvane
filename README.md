@@ -1,6 +1,6 @@
 # Orvane
 
-[![CI](https://github.com/andykr1k/Orvane/actions/workflows/ci.yml/badge.svg)](https://github.com/andykr1k/Orvane/actions/workflows/ci.yml)
+[![CI](https://github.com/BethalaRinosh/Orvane/actions/workflows/ci.yml/badge.svg)](https://github.com/BethalaRinosh/Orvane/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-3da639.svg)](LICENSE)
 [![Electron](https://img.shields.io/badge/Electron-43-47848f.svg)](https://www.electronjs.org/)
 
@@ -82,7 +82,7 @@ sudo apt install libxtst6 libxtst-dev
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/andykr1k/Orvane.git
+git clone https://github.com/BethalaRinosh/Orvane.git
 cd Orvane
 npm install
 ```
