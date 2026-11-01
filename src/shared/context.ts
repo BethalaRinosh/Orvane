@@ -34,7 +34,7 @@ export function compactChatHistory(history: ChatMessage[]): CompactChatMessage[]
   const omitted = older.length - selected.length;
   const lineBudget = Math.max(90, Math.floor((MEMORY_CHARACTER_BUDGET - 180) / selected.length));
   const lines = selected.map((message) => {
-    const label = message.role === "user" ? "User" : "OpenComputer";
+    const label = message.role === "user" ? "User" : "Orvane";
     return `${label}: ${clipMiddle(singleLine(message.content), lineBudget)}`;
   });
   if (omitted > 0) lines.splice(3, 0, `[${omitted} less-recent messages omitted]`);
