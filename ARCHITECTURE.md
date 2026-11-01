@@ -1,6 +1,6 @@
 # Architecture
 
-This document describes OpenComputer's runtime boundaries, agent loop, automation design, and extension points.
+This document describes Orvane's runtime boundaries, agent loop, automation design, and extension points.
 
 ## Runtime components
 
@@ -44,7 +44,7 @@ The preload script exposes typed IPC operations defined in `src/shared/contracts
 
 ## Visual coordinate system
 
-Qwen computer-use coordinates are represented on a normalized `0..1000` grid. OpenComputer maps the most recently returned image into Electron's primary-display bounds and then into the native automation coordinate space.
+Qwen computer-use coordinates are represented on a normalized `0..1000` grid. Orvane maps the most recently returned image into Electron's primary-display bounds and then into the native automation coordinate space.
 
 `view_region` crops a normalized rectangle and makes the crop a new `1000 × 1000` frame. Any action screenshot resets the frame to the full primary display. This prevents stale region coordinates from leaking into later actions.
 
