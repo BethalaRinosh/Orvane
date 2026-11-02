@@ -10,7 +10,7 @@ Until stable releases exist, security fixes are made on the latest `main` branch
 
 Do **not** open a public issue. Use GitHub's private vulnerability reporting:
 
-<https://github.com/andykr1k/Orvane/security/advisories/new>
+<https://github.com/BethalaRinosh/Orvane/security/advisories/new>
 
 Include:
 
