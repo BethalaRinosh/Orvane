@@ -2,6 +2,7 @@
 set -euo pipefail
 
 VLLM_ENV_DIR="${VLLM_ENV_DIR:-${HOME}/venvs/vllm}"
+ORVANE_MAX_MODEL_LEN="${ORVANE_MAX_MODEL_LEN:-8192}"
 
 if [[ ! -f "${VLLM_ENV_DIR}/bin/activate" ]]; then
   echo "vLLM environment not found at ${VLLM_ENV_DIR}." >&2
@@ -20,8 +21,9 @@ fi
 
 exec vllm serve RedHatAI/Qwen3.5-9B-quantized.w4a16 \
   --port 8000 \
+  --trust-remote-code \
   --tensor-parallel-size 1 \
-  --max-model-len 8192 \
+  --max-model-len "${ORVANE_MAX_MODEL_LEN}" \
   --max-num-seqs 1 \
   --gpu-memory-utilization 0.90 \
   --reasoning-parser qwen3 \
