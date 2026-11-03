@@ -27,5 +27,6 @@ exec vllm serve RedHatAI/Qwen3.5-9B-quantized.w4a16 \
   --max-num-seqs 1 \
   --gpu-memory-utilization 0.90 \
   --reasoning-parser qwen3 \
+  --default-chat-template-kwargs '{"enable_thinking": false}' \
   --enable-auto-tool-choice \
   --tool-call-parser qwen3_coder
