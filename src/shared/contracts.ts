@@ -17,6 +17,7 @@ export interface AppSettings {
   apiKey: string;
   permissionMode: PermissionMode;
   maxToolSteps: number;
+  maxOutputTokens: number;
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -26,6 +27,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   apiKey: "",
   permissionMode: "ask",
   maxToolSteps: 25,
+  maxOutputTokens: 2_048,
 };
 
 export interface ChatRequest {
