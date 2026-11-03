@@ -14,7 +14,12 @@ interface ModelMessage {
 }
 
 interface CompletionResponse {
-  choices?: Array<{ message?: ModelMessage }>;
+  id?: string;
+  choices?: Array<{
+    message?: ModelMessage & { reasoning_content?: string };
+    finish_reason?: string | null;
+  }>;
+  usage?: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number };
   error?: { message?: string };
 }
 
@@ -197,7 +202,10 @@ export class ModelClient {
           tools: TOOLS,
           tool_choice: "auto",
           temperature: 0.2,
-          max_tokens: 2_048,
+          max_tokens: 4_096,
+          ...(settings.providerMode === "local" && /qwen3\.5/i.test(settings.model)
+            ? { chat_template_kwargs: { enable_thinking: false } }
+            : {}),
         }),
         signal: AbortSignal.any([signal, AbortSignal.timeout(120_000)]),
       });
@@ -214,8 +222,33 @@ export class ModelClient {
       throw new Error(`The model endpoint returned an invalid response (${response.status}).`);
     }
     if (!response.ok) throw new Error(data.error?.message || `Model request failed (${response.status}).`);
-    const message = data.choices?.[0]?.message;
-    if (!message) throw new Error("The model endpoint returned no assistant message.");
+    const choice = data.choices?.[0];
+    const message = choice?.message;
+    if (!message) {
+      throw new Error(
+        `The model endpoint returned no assistant message (HTTP ${response.status}). ` +
+        `Response ID: ${data.id ?? "not supplied"}.`,
+      );
+    }
+
+    if (!message.tool_calls?.length && !extractAssistantText(message.content)) {
+      const finishReason = choice?.finish_reason ?? "not supplied";
+      const reasoningOnly = Boolean(message.reasoning_content?.trim());
+      const tokenUsage = data.usage
+        ? ` Tokens: ${data.usage.completion_tokens ?? "?"}/${data.usage.total_tokens ?? "?"} completion/total.`
+        : "";
+      const hint = finishReason === "length"
+        ? " The model hit its generation limit before producing a usable answer or tool call."
+        : reasoningOnly
+          ? " The server returned reasoning but no user-facing answer or tool call."
+          : " The server returned neither message text nor a parsed function call.";
+      throw new Error(
+        `The model returned an empty assistant message (finish_reason=${finishReason}).` +
+        hint + tokenUsage +
+        " For Qwen3.5 on vLLM, Orvane now requests non-thinking mode and a 4096-token output budget. " +
+        "If this persists, check the vLLM console for chat-template or tool-parser errors.",
+      );
+    }
     return message;
   }
 }
