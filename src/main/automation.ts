@@ -36,6 +36,11 @@ interface PendingApproval {
   targetWindow?: NutWindow;
 }
 
+const TOOL_NAMES = new Set<ToolName>([
+  "view_screen", "view_region", "move_mouse", "left_click", "right_click",
+  "middle_click", "double_click", "drag", "scroll", "type_text", "press_key",
+  "open_url", "wait",
+]);
 const READ_ONLY_TOOLS = new Set<ToolName>(["view_screen", "view_region", "wait"]);
 
 interface NormalizedRegion {
@@ -172,6 +177,7 @@ export class DesktopAutomation {
   async execute(call: ToolCall, requireApproval: boolean, signal?: AbortSignal): Promise<ToolResult> {
     signal?.throwIfAborted();
     const name = call.function.name as ToolName;
+    if (!TOOL_NAMES.has(name)) throw new Error(`Unsupported tool: ${String(call.function.name)}`);
     const args = parseArguments(call.function.arguments);
     const summary = summarize(name, args);
     const progress: ToolProgress = { tool: name, summary };
@@ -242,10 +248,28 @@ export class DesktopAutomation {
         const modifiers = Array.isArray(args.modifiers)
           ? args.modifiers.map((value) => resolveKey(String(value)))
           : [];
-        if (modifiers.length) await keyboard.pressKey(...modifiers);
-        await keyboard.pressKey(key);
-        await keyboard.releaseKey(key);
-        if (modifiers.length) await keyboard.releaseKey(...modifiers.reverse());
+        const pressedModifiers: Key[] = [];
+        let keyPressed = false;
+        try {
+          for (const modifier of modifiers) {
+            await keyboard.pressKey(modifier);
+            pressedModifiers.push(modifier);
+          }
+          await keyboard.pressKey(key);
+          keyPressed = true;
+        } finally {
+          try {
+            if (keyPressed) await keyboard.releaseKey(key);
+          } finally {
+            for (const modifier of pressedModifiers.reverse()) {
+              try {
+                await keyboard.releaseKey(modifier);
+              } catch {
+                // Continue releasing the remaining modifiers if one release fails.
+              }
+            }
+          }
+        }
         return this.verifyAction(`Pressed ${String(args.key)}.`);
       }
       case "open_url": {
