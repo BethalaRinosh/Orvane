@@ -120,11 +120,18 @@ export class ModelClient {
       signal.throwIfAborted();
       const assistant = await this.complete(messages, settings, signal);
       if (!assistant.tool_calls?.length) {
-        const content = typeof assistant.content === "string" ? assistant.content.trim() : "";
+        const content = extractAssistantText(assistant.content);
+        if (!content) {
+          throw new Error(
+            "The model returned an empty response and did not provide any desktop actions. " +
+            "Nothing was confirmed as completed. Check that your local model supports " +
+            "OpenAI-compatible tool calling and try again.",
+          );
+        }
         return {
           id: randomUUID(),
           role: "assistant",
-          content: content || "I finished without a text response.",
+          content,
           createdAt: Date.now(),
         };
       }
@@ -211,6 +218,16 @@ export class ModelClient {
     if (!message) throw new Error("The model endpoint returned no assistant message.");
     return message;
   }
+}
+
+function extractAssistantText(content: ModelContent | null): string {
+  if (typeof content === "string") return content.trim();
+  if (!Array.isArray(content)) return "";
+  return content
+    .map((part) => typeof part.text === "string" ? part.text : "")
+    .filter(Boolean)
+    .join("\n")
+    .trim();
 }
 
 function desktopImageMessage(text: string, result: { text: string; imageDataUrl?: string }): ModelMessage {
