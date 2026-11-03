@@ -280,6 +280,7 @@ function fillSettings(settings: AppSettings): void {
   setPermissionControl("settings-permission", settings.permissionMode);
   setPermissionControl("quick-permission", settings.permissionMode);
   valueOf<HTMLInputElement>("max-tool-steps", String(settings.maxToolSteps));
+  valueOf<HTMLInputElement>("max-output-tokens", String(settings.maxOutputTokens));
   updatePermissionCopy(settings.permissionMode);
   updateStatus(settings);
 }
@@ -311,6 +312,7 @@ async function saveSettings(): Promise<void> {
       apiKey: element<HTMLInputElement>("api-key").value,
       permissionMode: selectedPermission("settings-permission"),
       maxToolSteps: Number(element<HTMLInputElement>("max-tool-steps").value),
+      maxOutputTokens: Number(element<HTMLInputElement>("max-output-tokens").value),
     });
     fillSettings(saved);
     result.textContent = "Saved";
