@@ -22,7 +22,7 @@ let stopping = false;
 let stopRequested = false;
 let pendingApproval: ToolApprovalRequest | null = null;
 let approvalTimer: ReturnType<typeof setTimeout> | undefined;
-let hoverCollapseTimer: ReturnType<typeof setTimeout> | undefined;
+let hoverCollapseTimer: ReturnType<typeof setTimeout> | undefined;\nlet hoverExpandTimer: ReturnType<typeof setTimeout> | undefined;
 const history: ChatMessage[] = [];
 
 orb.addEventListener("pointerenter", () => {
