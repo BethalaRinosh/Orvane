@@ -22,18 +22,20 @@ let stopping = false;
 let stopRequested = false;
 let pendingApproval: ToolApprovalRequest | null = null;
 let approvalTimer: ReturnType<typeof setTimeout> | undefined;
-let hoverCollapseTimer: ReturnType<typeof setTimeout> | undefined;\nlet hoverExpandTimer: ReturnType<typeof setTimeout> | undefined;
+let hoverCollapseTimer: ReturnType<typeof setTimeout> | undefined;
+let hoverExpandTimer: ReturnType<typeof setTimeout> | undefined;\nlet hoverExpandTimer: ReturnType<typeof setTimeout> | undefined;
 const history: ChatMessage[] = [];
 
 orb.addEventListener("pointerenter", () => {
   clearTimeout(hoverCollapseTimer);
-  void expand();
+  clearTimeout(hoverExpandTimer);
+  hoverExpandTimer = setTimeout(() => {
+    if (orb.matches(":hover") && !expanded) void expand();
+  }, 2_000);
 });
 
-orb.addEventListener("click", async () => {
-  clearTimeout(hoverCollapseTimer);
-  await expand();
-  prompt.focus();
+orb.addEventListener("pointerleave", () => {
+  clearTimeout(hoverExpandTimer);
 });
 
 app.addEventListener("pointerleave", () => {
@@ -130,7 +132,7 @@ async function collapse(): Promise<void> {
   app.classList.add("resizing-window");
   app.classList.add("collapsed");
   app.classList.remove("expanded");
-  await new Promise((resolve) => setTimeout(resolve, 150));
+  await new Promise((resolve) => setTimeout(resolve, 620));
   if (expanded) {
     app.classList.remove("resizing-window");
     return;
