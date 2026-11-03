@@ -642,3 +642,33 @@ html, body { background: transparent; }
 @media (prefers-reduced-motion:reduce) {
   .panel,.panel-header,.chat-view,.settings-view { transition:none !important; }
 }
+
+
+/* Final polish: slimmer island and a completely shadow-free interface. */
+.orb {
+  top: 0;
+  height: 8px;
+  min-height: 8px;
+  box-shadow: none !important;
+}
+.panel {
+  height: 8px;
+  box-shadow: none !important;
+  transition:
+    width .52s cubic-bezier(.16,1,.3,1),
+    height .58s cubic-bezier(.16,1,.3,1),
+    border-radius .46s cubic-bezier(.16,1,.3,1),
+    background .35s ease;
+}
+.collapsed .panel {
+  height: 8px;
+  box-shadow: none !important;
+}
+.expanded .panel {
+  box-shadow: none !important;
+}
+* {
+  box-shadow: none !important;
+  text-shadow: none !important;
+  filter: none !important;
+}
