@@ -203,9 +203,6 @@ export class ModelClient {
           tool_choice: "auto",
           temperature: 0.2,
           max_tokens: settings.maxOutputTokens,
-          ...(settings.providerMode === "local" && /qwen3\.5/i.test(settings.model)
-            ? { chat_template_kwargs: { enable_thinking: false } }
-            : {}),
         }),
         signal: AbortSignal.any([signal, AbortSignal.timeout(120_000)]),
       });
@@ -238,14 +235,14 @@ export class ModelClient {
         ? ` Usage: prompt=${data.usage.prompt_tokens ?? "?"}, completion=${data.usage.completion_tokens ?? "?"}, total=${data.usage.total_tokens ?? "?"} tokens.`
         : " Usage details were not provided by the server.";
       const hint = finishReason === "length"
-        ? " The model hit its generation limit before producing a usable answer or tool call."
+        ? " The inference server stopped generation at a length boundary. This can be the output-token cap or the server context limit, not a paid quota."
         : reasoningOnly
           ? " The server returned reasoning but no user-facing answer or tool call."
           : " The server returned neither message text nor a parsed function call.";
       throw new Error(
         `The model returned an empty assistant message (finish_reason=${finishReason}).` +
         hint + tokenUsage +
-        ` Orvane requested up to ${settings.maxOutputTokens} output tokens. ` +
+        ` Orvane requested up to ${settings.maxOutputTokens} generated tokens for this response. ` +
         "If this persists, check the vLLM console for chat-template or tool-parser errors.",
       );
     }
