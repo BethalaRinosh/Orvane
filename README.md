@@ -89,10 +89,21 @@ npm install
 
 ### 2. Start a model
 
-The included launcher expects a vLLM environment at `~/venvs/vllm`:
+The included launcher expects a vLLM environment at `~/venvs/vllm`. Qwen3.5 requires a recent vLLM release (use vLLM 0.17.0 or newer). vLLM is intended to run in Linux; on Windows, use WSL2 with a supported NVIDIA CUDA setup rather than trying to install the vLLM server natively in PowerShell.
+
+The server context window defaults to 8192 tokens. Set `ORVANE_MAX_MODEL_LEN` before launching to change it, then restart the model server. This is a local GPU-memory/context setting, not a paid token quota:
 
 ```bash
-npm run model:start
+ORVANE_MAX_MODEL_LEN=8192 npm run model:start
+```
+
+From Windows PowerShell, start your configured WSL distribution and run the Linux launcher inside it, for example:
+
+```powershell
+wsl -d Ubuntu
+# Then, inside WSL:
+cd /path/to/Orvane
+ORVANE_MAX_MODEL_LEN=8192 npm run model:start
 ```
 
 Set `VLLM_ENV_DIR` if your environment is elsewhere:
@@ -107,6 +118,7 @@ Equivalent vLLM command:
 vllm serve RedHatAI/Qwen3.5-9B-quantized.w4a16 \
   --port 8000 \
   --tensor-parallel-size 1 \
+  --trust-remote-code \
   --max-model-len 8192 \
   --max-num-seqs 1 \
   --gpu-memory-utilization 0.90 \
