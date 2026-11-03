@@ -154,7 +154,7 @@ Open model settings from the gear button and configure:
 - **API key:** optional for local endpoints.
 - **Tool steps:** maximum agent iterations for one request.
 
-The endpoint must support image inputs, function tools, and the model's tool-call format. API keys are stored in Electron's per-user application-data directory with user-only file permissions, but are not yet backed by the operating-system keychain.
+The endpoint must support image inputs, function tools, and the model's tool-call format. With local vLLM, inference runs on your own hardware and Orvane does not charge per token. The generated-token setting is a per-response compute limit, not a credit balance or subscription. If you switch to a remote provider, that provider may bill according to its own pricing, and prompts/screenshots are sent to that provider. API keys are stored in Electron's per-user application-data directory with user-only file permissions, but are not yet backed by the operating-system keychain.
 
 ## Permission modes and safety
 
