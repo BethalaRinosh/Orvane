@@ -3,9 +3,9 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const currentDir = fileURLToPath(new URL(".", import.meta.url));
-const COLLAPSED = { width: 232, height: 44 };
+const COLLAPSED = { width: 196, height: 34 };
 const EXPANDED = { width: 440, height: 640 };
-const MARGIN = 8;
+const MARGIN = 6;
 
 export class AssistantWindow {
   readonly browserWindow: BrowserWindow;
