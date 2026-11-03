@@ -3,9 +3,9 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const currentDir = fileURLToPath(new URL(".", import.meta.url));
-const COLLAPSED = { width: 76, height: 76 };
-const EXPANDED = { width: 408, height: 620 };
-const MARGIN = 18;
+const COLLAPSED = { width: 232, height: 44 };
+const EXPANDED = { width: 440, height: 640 };
+const MARGIN = 8;
 
 export class AssistantWindow {
   readonly browserWindow: BrowserWindow;
@@ -86,7 +86,7 @@ export class AssistantWindow {
   private coordinates(size: typeof COLLAPSED): { x: number; y: number } {
     const workArea = screen.getPrimaryDisplay().workArea;
     return {
-      x: workArea.x + workArea.width - size.width - MARGIN,
+      x: workArea.x + Math.round((workArea.width - size.width) / 2),
       y: workArea.y + MARGIN,
     };
   }
