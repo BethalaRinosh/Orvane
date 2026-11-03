@@ -22,12 +22,29 @@ let stopping = false;
 let stopRequested = false;
 let pendingApproval: ToolApprovalRequest | null = null;
 let approvalTimer: ReturnType<typeof setTimeout> | undefined;
+let hoverCollapseTimer: ReturnType<typeof setTimeout> | undefined;
 const history: ChatMessage[] = [];
 
+orb.addEventListener("pointerenter", () => {
+  clearTimeout(hoverCollapseTimer);
+  void expand();
+});
+
 orb.addEventListener("click", async () => {
+  clearTimeout(hoverCollapseTimer);
   await expand();
   prompt.focus();
 });
+
+app.addEventListener("pointerleave", () => {
+  if (!expanded || busy) return;
+  clearTimeout(hoverCollapseTimer);
+  hoverCollapseTimer = setTimeout(() => {
+    if (!app.matches(":hover") && !busy) void collapse();
+  }, 320);
+});
+
+app.addEventListener("pointerenter", () => clearTimeout(hoverCollapseTimer));
 
 element("collapse-button").addEventListener("click", () => {
   void collapse();
@@ -147,6 +164,11 @@ async function sendMessage(): Promise<void> {
   } finally {
     setBusy(false);
     prompt.focus();
+    if (!app.matches(":hover")) {
+      hoverCollapseTimer = setTimeout(() => {
+        if (!app.matches(":hover") && !busy) void collapse();
+      }, 900);
+    }
   }
 }
 
@@ -233,6 +255,7 @@ function setBusy(value: boolean, label = "Thinking"): void {
   element<HTMLButtonElement>("settings-button").disabled = value;
   activity.querySelector("p")!.textContent = label;
   activity.classList.toggle("hidden", !value);
+  app.classList.toggle("is-busy", value);
 }
 
 async function showSettings(): Promise<void> {
