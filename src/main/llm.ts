@@ -234,8 +234,11 @@ export class ModelClient {
       const tokenUsage = data.usage
         ? ` Usage: prompt=${data.usage.prompt_tokens ?? "?"}, completion=${data.usage.completion_tokens ?? "?"}, total=${data.usage.total_tokens ?? "?"} tokens.`
         : " Usage details were not provided by the server.";
+      const contextCapHint = data.usage?.total_tokens === 4_096
+        ? " The response used exactly 4096 total tokens. That strongly suggests the running server is enforcing a 4096-token context window; check its actual --max-model-len and restart it with ORVANE_MAX_MODEL_LEN=8192 if your GPU has room."
+        : "";
       const hint = finishReason === "length"
-        ? " The inference server stopped generation at a length boundary. This can be the output-token cap or the server context limit, not a paid quota."
+        ? " The inference server stopped generation at a length boundary. This can be the output-token cap or the server context limit, not a paid quota." + contextCapHint
         : reasoningOnly
           ? " The server returned reasoning but no user-facing answer or tool call."
           : " The server returned neither message text nor a parsed function call.";
