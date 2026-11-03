@@ -23,7 +23,13 @@ describe("sanitizeSettings", () => {
       apiKey: "secret",
       permissionMode: "automatic",
       maxToolSteps: 30,
+      maxOutputTokens: DEFAULT_SETTINGS.maxOutputTokens,
     });
+  });
+
+  it("clamps the generation budget", () => {
+    expect(sanitizeSettings({ maxOutputTokens: 20_000 }).maxOutputTokens).toBe(8_192);
+    expect(sanitizeSettings({ maxOutputTokens: 1 }).maxOutputTokens).toBe(256);
   });
 
   it("migrates the legacy approval checkbox", () => {
