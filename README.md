@@ -91,7 +91,7 @@ npm install
 
 The included launcher expects a vLLM environment at `~/venvs/vllm`. Qwen3.5 requires a recent vLLM release (use vLLM 0.17.0 or newer). vLLM is intended to run in Linux; on Windows, use WSL2 with a supported NVIDIA CUDA setup rather than trying to install the vLLM server natively in PowerShell.
 
-The server context window defaults to 8192 tokens. Set `ORVANE_MAX_MODEL_LEN` before launching to change it, then restart the model server. This is a local GPU-memory/context setting, not a paid token quota:
+The server context window defaults to 8192 tokens. Qwen3.5 is launched in non-thinking mode to keep its response budget available for answers and desktop tool calls. Set `ORVANE_MAX_MODEL_LEN` before launching to change it, then restart the model server. This is a local GPU-memory/context setting, not a paid token quota:
 
 ```bash
 ORVANE_MAX_MODEL_LEN=8192 npm run model:start
@@ -123,6 +123,7 @@ vllm serve RedHatAI/Qwen3.5-9B-quantized.w4a16 \
   --max-num-seqs 1 \
   --gpu-memory-utilization 0.90 \
   --reasoning-parser qwen3 \
+  --default-chat-template-kwargs '{"enable_thinking": false}' \
   --enable-auto-tool-choice \
   --tool-call-parser qwen3_coder
 ```
