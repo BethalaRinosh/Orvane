@@ -202,7 +202,7 @@ export class ModelClient {
           tools: TOOLS,
           tool_choice: "auto",
           temperature: 0.2,
-          max_tokens: 4_096,
+          max_tokens: settings.maxOutputTokens,
           ...(settings.providerMode === "local" && /qwen3\.5/i.test(settings.model)
             ? { chat_template_kwargs: { enable_thinking: false } }
             : {}),
@@ -235,8 +235,8 @@ export class ModelClient {
       const finishReason = choice?.finish_reason ?? "not supplied";
       const reasoningOnly = Boolean(message.reasoning_content?.trim());
       const tokenUsage = data.usage
-        ? ` Tokens: ${data.usage.completion_tokens ?? "?"}/${data.usage.total_tokens ?? "?"} completion/total.`
-        : "";
+        ? ` Usage: prompt=${data.usage.prompt_tokens ?? "?"}, completion=${data.usage.completion_tokens ?? "?"}, total=${data.usage.total_tokens ?? "?"} tokens.`
+        : " Usage details were not provided by the server.";
       const hint = finishReason === "length"
         ? " The model hit its generation limit before producing a usable answer or tool call."
         : reasoningOnly
@@ -245,7 +245,7 @@ export class ModelClient {
       throw new Error(
         `The model returned an empty assistant message (finish_reason=${finishReason}).` +
         hint + tokenUsage +
-        " For Qwen3.5 on vLLM, Orvane now requests non-thinking mode and a 4096-token output budget. " +
+        ` Orvane requested up to ${settings.maxOutputTokens} output tokens. ` +
         "If this persists, check the vLLM console for chat-template or tool-parser errors.",
       );
     }
