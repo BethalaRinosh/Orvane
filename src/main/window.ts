@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const currentDir = fileURLToPath(new URL(".", import.meta.url));
-const COLLAPSED = { width: 196, height: 34 };
+const COLLAPSED = { width: 120, height: 12 };
 const EXPANDED = { width: 440, height: 640 };
 const MARGIN = 6;
 
