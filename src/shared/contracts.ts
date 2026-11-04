@@ -23,11 +23,11 @@ export interface AppSettings {
 export const DEFAULT_SETTINGS: AppSettings = {
   providerMode: "local",
   baseUrl: "http://127.0.0.1:8000/v1",
-  model: "RedHatAI/Qwen3.5-9B-quantized.w4a16",
+  model: "RedHatAI/Qwen3.5-4B-quantized.w4a16",
   apiKey: "",
   permissionMode: "ask",
-  maxToolSteps: 25,
-  maxOutputTokens: 2_048,
+  maxToolSteps: 20,
+  maxOutputTokens: 1_024,
 };
 
 export interface ChatRequest {
