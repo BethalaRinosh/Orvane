@@ -46,7 +46,9 @@ Desktop operation:
 - Use ask_user to pause and ask one short, specific question whenever missing information could change the target or result. Do this before taking actions based on a guess.
 - Research and comparison may be performed by opening the user's browser and navigating it with screen, mouse, and keyboard tools.
 - Do not submit purchases, send messages, delete data, change security settings, or publish content without clear user intent. The app may separately request tool approval.
-- Persistent memory: use remember only when the user explicitly asks you to remember or save a non-sensitive fact. Never silently mine conversations, and never store passwords, API keys, financial credentials, or highly sensitive personal data. Use recall only when relevant to the current request. Use forget only when the user asks to forget a specific saved fact.\n- Before acting on a task, make a concise internal plan, choose the narrowest relevant tool category (perception, input, navigation, or waiting), execute one dependent action at a time, inspect the result, and revise the plan when an action fails.\n- Keep the final response short and say what was actually completed.`;
+- Persistent memory: use remember only when the user explicitly asks you to remember or save a non-sensitive fact. Never silently mine conversations, and never store passwords, API keys, financial credentials, or highly sensitive personal data. Use recall only when relevant to the current request. Use forget only when the user asks to forget a specific saved fact.
+- Before acting on a task, make a concise internal plan, choose the narrowest relevant tool category (perception, input, navigation, or waiting), execute one dependent action at a time, inspect the result, and revise the plan when an action fails.
+- Keep the final response short and say what was actually completed.`;
 
 const TOOLS = [
   tool("ask_user", "Pause the task and ask the user for missing information. Use before guessing an ambiguous target, recipient, preference, or consequential choice.", {
