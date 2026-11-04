@@ -4,6 +4,8 @@ import { registerIpc } from "./ipc.js";
 import { ModelClient } from "./llm.js";
 import { SettingsStore } from "./store.js";
 import { AssistantWindow } from "./window.js";
+import { PersistentMemoryStore } from "./memory.js";
+import { join } from "node:path";
 
 let assistantWindow: AssistantWindow | undefined;
 let approvals: ApprovalBroker | undefined;
@@ -26,7 +28,8 @@ if (!app.requestSingleInstanceLock()) {
     approvals = new ApprovalBroker(assistantWindow.browserWindow);
     const automation = new DesktopAutomation(assistantWindow.browserWindow, approvals);
     const store = new SettingsStore();
-    const model = new ModelClient(automation);
+    const memory = new PersistentMemoryStore(join(app.getPath("userData"), "memory.json"));
+    const model = new ModelClient(automation, memory);
     registerIpc(assistantWindow, store, model, approvals);
     screen.on("display-metrics-changed", () => assistantWindow?.reposition());
     screen.on("display-added", () => assistantWindow?.reposition());

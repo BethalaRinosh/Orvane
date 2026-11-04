@@ -3,6 +3,7 @@ import type { AppSettings, ChatMessage } from "../shared/contracts.js";
 import { compactActionLedger, compactChatHistory } from "../shared/context.js";
 import { chatCompletionsUrl } from "../shared/settings.js";
 import type { DesktopAutomation, ToolCall } from "./automation.js";
+import type { PersistentMemoryStore } from "./memory.js";
 
 type ModelContent = string | Array<Record<string, unknown>>;
 
@@ -45,7 +46,7 @@ Desktop operation:
 - Use ask_user to pause and ask one short, specific question whenever missing information could change the target or result. Do this before taking actions based on a guess.
 - Research and comparison may be performed by opening the user's browser and navigating it with screen, mouse, and keyboard tools.
 - Do not submit purchases, send messages, delete data, change security settings, or publish content without clear user intent. The app may separately request tool approval.
-- Keep the final response short and say what was actually completed.`;
+- Persistent memory: use remember only when the user explicitly asks you to remember or save a non-sensitive fact. Never silently mine conversations, and never store passwords, API keys, financial credentials, or highly sensitive personal data. Use recall only when relevant to the current request. Use forget only when the user asks to forget a specific saved fact.\n- Before acting on a task, make a concise internal plan, choose the narrowest relevant tool category (perception, input, navigation, or waiting), execute one dependent action at a time, inspect the result, and revise the plan when an action fails.\n- Keep the final response short and say what was actually completed.`;
 
 const TOOLS = [
   tool("ask_user", "Pause the task and ask the user for missing information. Use before guessing an ambiguous target, recipient, preference, or consequential choice.", {
@@ -105,8 +106,24 @@ const TOOLS = [
   }, ["milliseconds"]),
 ];
 
+const MEMORY_TOOLS = [
+  tool("remember", "Save a non-sensitive fact only when the user explicitly asks you to remember or save it. Provide a short stable key and the exact fact.", {
+    key: { type: "string", description: "Short stable label for this fact." },
+    value: { type: "string", description: "The non-sensitive fact to save." },
+  }, ["key", "value"]),
+  tool("recall", "Search facts the user explicitly saved in Orvane. Use only when relevant to the current request.", {
+    query: { type: "string", description: "A short phrase describing the fact to find." },
+  }, ["query"]),
+  tool("forget", "Delete one saved memory by its exact key when the user asks you to forget that fact.", {
+    key: { type: "string", description: "The saved memory key to delete." },
+  }, ["key"]),
+];
+
 export class ModelClient {
-  constructor(private readonly automation: DesktopAutomation) {}
+  constructor(
+    private readonly automation: DesktopAutomation,
+    private readonly memory: PersistentMemoryStore,
+  ) {}
 
   async chat(history: ChatMessage[], settings: AppSettings, signal: AbortSignal): Promise<ChatMessage> {
     const conversation = compactChatHistory(history).map((message) => ({ ...message }) as ModelMessage);
@@ -157,6 +174,12 @@ export class ModelClient {
       for (const call of assistant.tool_calls) {
         signal.throwIfAborted();
         try {
+          if (["remember", "recall", "forget"].includes(call.function.name)) {
+            const result = await this.executeMemoryTool(call, history);
+            toolMessages.push({ role: "tool", tool_call_id: call.id, content: result });
+            roundLedger.push(`${call.function.name}: ${result}`);
+            continue;
+          }
           const result = await this.automation.execute(call, settings.permissionMode === "ask", signal);
           toolMessages.push({ role: "tool", tool_call_id: call.id, content: result.text });
           roundLedger.push(`${call.function.name}: ${result.text}`);
@@ -187,6 +210,45 @@ export class ModelClient {
     throw new Error("The model did not produce a final response.");
   }
 
+  private async executeMemoryTool(call: ToolCall, history: ChatMessage[]): Promise<string> {
+    let args: Record<string, unknown>;
+    try {
+      const parsed: unknown = JSON.parse(call.function.arguments || "{}");
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error();
+      args = parsed as Record<string, unknown>;
+    } catch {
+      throw new Error("The model supplied invalid memory arguments.");
+    }
+
+    const latestUserMessage = [...history].reverse().find((message) => message.role === "user")?.content ?? "";
+    if (call.function.name === "remember" && !/\b(remember|save|store|keep in mind)\b/i.test(latestUserMessage)) {
+      return "I only save facts when you explicitly ask me to remember or save them.";
+    }
+    if (call.function.name === "forget" && !/\b(forget|delete|remove|erase)\b/i.test(latestUserMessage)) {
+      return "I only delete saved facts when you explicitly ask me to forget or delete them.";
+    }
+
+    switch (call.function.name) {
+      case "remember": {
+        const entry = await this.memory.remember(String(args.key ?? ""), String(args.value ?? ""));
+        return `Saved memory "${entry.key}".`;
+      }
+      case "recall": {
+        const entries = await this.memory.recall(String(args.query ?? ""));
+        return entries.length
+          ? entries.map((entry) => `- ${entry.key}: ${entry.value}`).join("\n")
+          : "No matching saved memories.";
+      }
+      case "forget": {
+        const key = String(args.key ?? "");
+        const removed = await this.memory.forget(key);
+        return removed ? `Forgot saved memory "${key}".` : `No saved memory found with key "${key}".`;
+      }
+      default:
+        throw new Error("Unsupported memory operation.");
+    }
+  }
+
   private async complete(messages: ModelMessage[], settings: AppSettings, signal: AbortSignal): Promise<ModelMessage> {
     let response: Response;
     try {
@@ -199,7 +261,7 @@ export class ModelClient {
         body: JSON.stringify({
           model: settings.model,
           messages,
-          tools: TOOLS,
+          tools: [...TOOLS, ...MEMORY_TOOLS],
           tool_choice: "auto",
           temperature: 0.2,
           max_tokens: settings.maxOutputTokens,
