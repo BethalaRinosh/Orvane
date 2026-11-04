@@ -5,13 +5,15 @@ import { chatCompletionsUrl, sanitizeSettings } from "./settings.js";
 describe("sanitizeSettings", () => {
   it("uses a laptop-friendly local vision model by default", () => {
     expect(sanitizeSettings(undefined)).toEqual(DEFAULT_SETTINGS);
-    expect(DEFAULT_SETTINGS.model).toBe("RedHatAI/Qwen3.5-4B-quantized.w4a16");
+    expect(DEFAULT_SETTINGS.model).toBe("qwen3.5:4b");
     expect(DEFAULT_SETTINGS.maxOutputTokens).toBe(1_024);
   });
 
-  it("migrates the previous bundled 9B model to the 4B laptop default", () => {
+  it("migrates previous bundled model defaults to native Ollama", () => {
     expect(sanitizeSettings({ model: "RedHatAI/Qwen3.5-9B-quantized.w4a16" }).model)
-      .toBe("RedHatAI/Qwen3.5-4B-quantized.w4a16");
+      .toBe("qwen3.5:4b");
+    expect(sanitizeSettings({ model: "RedHatAI/Qwen3.5-4B-quantized.w4a16" }).model)
+      .toBe("qwen3.5:4b");
   });
 
   it("normalizes URLs and clamps tool steps", () => {
