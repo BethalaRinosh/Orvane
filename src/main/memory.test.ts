@@ -51,6 +51,11 @@ describe("PersistentMemoryStore", () => {
     await expect(store.remember("key", "x".repeat(1_001))).rejects.toThrow("1000 characters or fewer");
   });
 
+  it("rejects credential-like memory content", async () => {
+    const store = await createStore();
+    await expect(store.remember("API key", "sk-1234567890abcdefghijklmnop")).rejects.toThrow("cannot be saved");
+  });
+
   it("fails closed on malformed files without overwriting them", async () => {
     const store = await createStore();
     const path = join(directories[0], "memory.json");
