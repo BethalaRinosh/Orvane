@@ -22,7 +22,11 @@ describe("PersistentMemoryStore", () => {
     const entries = await store.list();
     expect(entries).toHaveLength(1);
     expect(entries[0].value).toBe("VS Code");
-    expect(new PersistentMemoryStore(join(directories[0], "memory.json"))).toBeDefined();
+    const reopened = new PersistentMemoryStore(join(directories[0], "memory.json"));
+    expect((await reopened.recall("visual studio code"))[0]).toMatchObject({
+      key: "preferred editor",
+      value: "VS Code",
+    });
   });
 
   it("recalls relevant entries and returns recent entries for an empty query", async () => {
