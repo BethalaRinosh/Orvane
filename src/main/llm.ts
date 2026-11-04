@@ -3,7 +3,7 @@ import type { AppSettings, ChatMessage } from "../shared/contracts.js";
 import { compactActionLedger, compactChatHistory } from "../shared/context.js";
 import { chatCompletionsUrl } from "../shared/settings.js";
 import type { DesktopAutomation, ToolCall } from "./automation.js";
-import { PersistentMemoryStore } from "./memory.js";
+import type { PersistentMemoryStore } from "./memory.js";
 
 type ModelContent = string | Array<Record<string, unknown>>;
 
