@@ -3,8 +3,10 @@ import { DEFAULT_SETTINGS } from "./contracts.js";
 import { chatCompletionsUrl, sanitizeSettings } from "./settings.js";
 
 describe("sanitizeSettings", () => {
-  it("uses local vLLM and Qwen defaults", () => {
+  it("uses a laptop-friendly local vision model by default", () => {
     expect(sanitizeSettings(undefined)).toEqual(DEFAULT_SETTINGS);
+    expect(DEFAULT_SETTINGS.model).toBe("RedHatAI/Qwen3.5-4B-quantized.w4a16");
+    expect(DEFAULT_SETTINGS.maxOutputTokens).toBe(1_024);
   });
 
   it("normalizes URLs and clamps tool steps", () => {
@@ -28,7 +30,7 @@ describe("sanitizeSettings", () => {
   });
 
   it("clamps the generation budget", () => {
-    expect(sanitizeSettings({ maxOutputTokens: 20_000 }).maxOutputTokens).toBe(8_192);
+    expect(sanitizeSettings({ maxOutputTokens: 20_000 }).maxOutputTokens).toBe(4_096);
     expect(sanitizeSettings({ maxOutputTokens: 1 }).maxOutputTokens).toBe(256);
   });
 
