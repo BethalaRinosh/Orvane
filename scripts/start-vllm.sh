@@ -2,10 +2,18 @@
 set -euo pipefail
 
 VLLM_ENV_DIR="${VLLM_ENV_DIR:-${HOME}/venvs/vllm}"
-ORVANE_MAX_MODEL_LEN="${ORVANE_MAX_MODEL_LEN:-8192}"
+# 4K context is the safe starting point for an 8 GB laptop GPU.
+ORVANE_MAX_MODEL_LEN="${ORVANE_MAX_MODEL_LEN:-4096}"
+ORVANE_MODEL="${ORVANE_MODEL:-RedHatAI/Qwen3.5-4B-quantized.w4a16}"
+ORVANE_GPU_MEMORY_UTILIZATION="${ORVANE_GPU_MEMORY_UTILIZATION:-0.88}"
 
-if ! [[ "${ORVANE_MAX_MODEL_LEN}" =~ ^[0-9]+$ ]] || (( ORVANE_MAX_MODEL_LEN < 4096 )); then
-  echo "ORVANE_MAX_MODEL_LEN must be an integer of at least 4096." >&2
+if ! [[ "${ORVANE_MAX_MODEL_LEN}" =~ ^[0-9]+$ ]] || (( ORVANE_MAX_MODEL_LEN < 2048 )); then
+  echo "ORVANE_MAX_MODEL_LEN must be an integer of at least 2048." >&2
+  exit 1
+fi
+
+if [[ ! "${ORVANE_GPU_MEMORY_UTILIZATION}" =~ ^0\.[0-9]+$ ]]; then
+  echo "ORVANE_GPU_MEMORY_UTILIZATION must be a decimal between 0 and 1, e.g. 0.88." >&2
   exit 1
 fi
 
@@ -15,7 +23,6 @@ if [[ ! -f "${VLLM_ENV_DIR}/bin/activate" ]]; then
   exit 1
 fi
 
-# Activation is required because FlashInfer invokes Ninja by executable name.
 source "${VLLM_ENV_DIR}/bin/activate"
 
 python - <<'PY'
@@ -36,13 +43,14 @@ if ! command -v ninja >/dev/null 2>&1; then
   exit 1
 fi
 
-exec vllm serve RedHatAI/Qwen3.5-9B-quantized.w4a16 \
+echo "Starting ${ORVANE_MODEL} with max context ${ORVANE_MAX_MODEL_LEN}."
+exec vllm serve "${ORVANE_MODEL}" \
   --port 8000 \
   --trust-remote-code \
   --tensor-parallel-size 1 \
   --max-model-len "${ORVANE_MAX_MODEL_LEN}" \
   --max-num-seqs 1 \
-  --gpu-memory-utilization 0.90 \
+  --gpu-memory-utilization "${ORVANE_GPU_MEMORY_UTILIZATION}" \
   --reasoning-parser qwen3 \
   --default-chat-template-kwargs '{"enable_thinking": false}' \
   --enable-auto-tool-choice \
