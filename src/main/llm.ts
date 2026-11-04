@@ -221,10 +221,10 @@ export class ModelClient {
     }
 
     const latestUserMessage = [...history].reverse().find((message) => message.role === "user")?.content ?? "";
-    if (call.function.name === "remember" && !/\\b(remember|save|store|keep in mind)\\b/i.test(latestUserMessage)) {
+    if (call.function.name === "remember" && !/\b(remember|save|store|keep in mind)\b/i.test(latestUserMessage)) {
       return "I only save facts when you explicitly ask me to remember or save them.";
     }
-    if (call.function.name === "forget" && !/\\b(forget|delete|remove|erase)\\b/i.test(latestUserMessage)) {
+    if (call.function.name === "forget" && !/\b(forget|delete|remove|erase)\b/i.test(latestUserMessage)) {
       return "I only delete saved facts when you explicitly ask me to forget or delete them.";
     }
 
