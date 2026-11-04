@@ -228,7 +228,7 @@ export class ModelClient {
       case "recall": {
         const entries = await this.memory.recall(String(args.query ?? ""));
         return entries.length
-          ? entries.map((entry) => `- ${entry.key}: ${entry.value}`).join("\\n")
+          ? entries.map((entry) => `- ${entry.key}: ${entry.value}`).join("\n")
           : "No matching saved memories.";
       }
       case "forget": {
