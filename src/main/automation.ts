@@ -334,7 +334,7 @@ export class DesktopAutomation {
     try {
       const sources = await desktopCapturer.getSources({
         types: ["screen"],
-        thumbnailSize: display.size,
+        thumbnailSize: { width: 1280, height: 720 },
         fetchWindowIcons: false,
       });
       const source = sources.find((candidate) => candidate.display_id === String(display.id)) ?? sources[0];
@@ -379,7 +379,7 @@ export class DesktopAutomation {
 
       this.lastCapture = { targetLeft, targetTop, targetWidth, targetHeight };
       const { width: resultWidth, height: resultHeight } = image.getSize();
-      const imageDataUrl = `data:image/jpeg;base64,${image.toJPEG(region ? 86 : 76).toString("base64")}`;
+      const imageDataUrl = `data:image/jpeg;base64,${image.toJPEG(region ? 82 : 68).toString("base64")}`;
       return {
         text: `${region ? "Desktop region" : "Primary desktop"} captured at ${resultWidth}x${resultHeight}. Treat this returned image as a fresh normalized 1000x1000 grid: top-left=(0,0), center=(500,500), bottom-right=(1000,1000).`,
         imageDataUrl,

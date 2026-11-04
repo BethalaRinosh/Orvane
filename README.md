@@ -6,7 +6,7 @@
 
 Orvane is an open-source, local-first computer-use agent for Linux, Windows, and macOS. It lives in a small desktop orb, expands into a chat panel, understands the screen, and can operate applications with the same basic interactions as a person.
 
-Run it privately with a local vision-language model through [vLLM](https://docs.vllm.ai/), or connect any compatible hosted API. The default configuration uses `RedHatAI/Qwen3.5-9B-quantized.w4a16`, selected to fit a useful multimodal agent loop on many 16 GB GPUs.
+Run it privately with a local vision-language model through native Windows [Ollama](https://ollama.com/), or connect any compatible hosted API. The default configuration uses `qwen3.5:4b`, a multimodal model with vision and tool support that is a more realistic starting point for 8 GB laptop GPUs. vLLM remains an optional Linux/WSL2 backend.
 
 > [!WARNING]
 > Orvane is experimental software with the ability to control your mouse and keyboard. Keep **Ask first** enabled, supervise actions, and do not use it around sensitive or irreversible workflows without understanding the risks.
@@ -91,10 +91,30 @@ npm install
 
 The included launcher expects a vLLM environment at `~/venvs/vllm`. Qwen3.5 requires a recent vLLM release (use vLLM 0.17.0 or newer). vLLM is intended to run in Linux; on Windows, use WSL2 with a supported NVIDIA CUDA setup rather than trying to install the vLLM server natively in PowerShell.
 
-The server context window defaults to 8192 tokens. Qwen3.5 is launched in non-thinking mode to keep its response budget available for answers and desktop tool calls. Set `ORVANE_MAX_MODEL_LEN` before launching to change it, then restart the model server. This is a local GPU-memory/context setting, not a paid token quota:
+### Native Windows setup (recommended for Windows laptops)
+
+Install Ollama for Windows from [ollama.com/download](https://ollama.com/download). It runs natively, uses NVIDIA GPU acceleration when available, and exposes an API on `http://localhost:11434`. No WSL or separate CUDA Toolkit installation is required for the Ollama path. Then run:
+
+```powershell
+ollama pull qwen3.5:4b
+ollama run qwen3.5:4b
+```
+
+In Orvane model settings use:
+
+- Provider: Local
+- Base URL: `http://127.0.0.1:11434/v1`
+- Model: `qwen3.5:4b`
+- API key: blank (Ollama ignores API keys)
+
+The default context is controlled by Ollama/model configuration rather than the OpenAI-compatible request. Orvane reduces screenshots to 1280×720 to reduce vision-token usage. Confirm GPU offload in `ollama ps` while a prompt is running. If the model does not fit, close GPU-heavy applications or choose a smaller model.
+
+### Optional vLLM backend (Linux/WSL2 only)
+
+vLLM does not support Windows natively. Use WSL2 with a supported NVIDIA CUDA setup if you specifically need vLLM. The launcher defaults to a 4096-token context for an 8 GB GPU and reserves GPU memory conservatively. Qwen3.5 is launched in non-thinking mode to keep its response budget available for answers and desktop tool calls. Increase context only after checking free VRAM and confirming the server can allocate its KV cache. This is a local GPU-memory/context setting, not a paid token quota:
 
 ```bash
-ORVANE_MAX_MODEL_LEN=8192 npm run model:start
+ORVANE_MAX_MODEL_LEN=4096 npm run model:start
 ```
 
 From Windows PowerShell, start your configured WSL distribution and run the Linux launcher inside it, for example:
@@ -128,7 +148,7 @@ vllm serve RedHatAI/Qwen3.5-9B-quantized.w4a16 \
   --tool-call-parser qwen3_coder
 ```
 
-Start at an `8192` context on a 16 GB GPU. If memory allows, increase it to `16384`. Model support and licensing are documented separately by the [checkpoint author](https://huggingface.co/RedHatAI/Qwen3.5-9B-quantized.w4a16); the repository's MIT license does not relicense model weights.
+Start at 4096 context for the optional vLLM path on an 8 GB laptop GPU. Actual runtime VRAM includes the vision encoder, CUDA/vLLM overhead, and KV cache. If the model does not load, close GPU-heavy applications and check `nvidia-smi` before trying a smaller model or lower context.
 
 ### 3. Start Orvane
 

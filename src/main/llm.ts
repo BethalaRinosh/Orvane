@@ -200,7 +200,6 @@ export class ModelClient {
           model: settings.model,
           messages,
           tools: TOOLS,
-          tool_choice: "auto",
           temperature: 0.2,
           max_tokens: settings.maxOutputTokens,
         }),
@@ -234,8 +233,8 @@ export class ModelClient {
       const tokenUsage = data.usage
         ? ` Usage: prompt=${data.usage.prompt_tokens ?? "?"}, completion=${data.usage.completion_tokens ?? "?"}, total=${data.usage.total_tokens ?? "?"} tokens.`
         : " Usage details were not provided by the server.";
-      const contextCapHint = data.usage?.total_tokens === 4_096
-        ? " The response used exactly 4096 total tokens. That strongly suggests the running server is enforcing a 4096-token context window; check its actual --max-model-len and restart it with ORVANE_MAX_MODEL_LEN=8192 if your GPU has room."
+      const contextCapHint = data.usage?.total_tokens
+        ? " Check the vLLM startup log for the effective max_model_len. The sum of prompt and generated tokens must fit inside that server-side context window. Do not increase it beyond what your GPU can hold."
         : "";
       const hint = finishReason === "length"
         ? " The inference server stopped generation at a length boundary. This can be the output-token cap or the server context limit, not a paid quota." + contextCapHint
