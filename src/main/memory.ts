@@ -30,6 +30,7 @@ export class PersistentMemoryStore {
   async remember(keyInput: string, valueInput: string): Promise<MemoryEntry> {
     const key = cleanText(keyInput, MAX_KEY_LENGTH, "Memory key");
     const value = cleanText(valueInput, MAX_VALUE_LENGTH, "Memory value");
+    if (looksSensitive(key, value)) throw new Error("This looks like a credential or sensitive secret and cannot be saved to memory.");
     const file = await this.load();
     const now = Date.now();
     const existing = file.entries.find((entry) => entry.key.toLocaleLowerCase() === key.toLocaleLowerCase());
@@ -109,6 +110,11 @@ function cleanText(value: string, maxLength: number, label: string): string {
   if (!cleaned) throw new Error(`${label} cannot be empty.`);
   if (cleaned.length > maxLength) throw new Error(`${label} must be ${maxLength} characters or fewer.`);
   return cleaned;
+}
+
+function looksSensitive(key: string, value: string): boolean {
+  const sensitiveLabel = /\\b(password|passcode|api[ _-]?key|access[ _-]?token|refresh[ _-]?token|secret|private[ _-]?key|credit[ _-]?card|cvv|bank[ _-]?account)\\b/i;
+  return sensitiveLabel.test(key) || sensitiveLabel.test(value) || /\\bsk-[A-Za-z0-9_-]{16,}\\b/.test(value);
 }
 
 function clampLimit(value: number): number {
