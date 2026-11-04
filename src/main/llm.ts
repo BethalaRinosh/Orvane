@@ -175,7 +175,7 @@ export class ModelClient {
         signal.throwIfAborted();
         try {
           if (["remember", "recall", "forget"].includes(call.function.name)) {
-            const result = await this.executeMemoryTool(call);
+            const result = await this.executeMemoryTool(call, history);
             toolMessages.push({ role: "tool", tool_call_id: call.id, content: result });
             roundLedger.push(`${call.function.name}: ${result}`);
             continue;
@@ -210,7 +210,7 @@ export class ModelClient {
     throw new Error("The model did not produce a final response.");
   }
 
-  private async executeMemoryTool(call: ToolCall): Promise<string> {
+  private async executeMemoryTool(call: ToolCall, history: ChatMessage[]): Promise<string> {
     let args: Record<string, unknown>;
     try {
       const parsed: unknown = JSON.parse(call.function.arguments || "{}");
@@ -218,6 +218,14 @@ export class ModelClient {
       args = parsed as Record<string, unknown>;
     } catch {
       throw new Error("The model supplied invalid memory arguments.");
+    }
+
+    const latestUserMessage = [...history].reverse().find((message) => message.role === "user")?.content ?? "";
+    if (call.function.name === "remember" && !/\\b(remember|save|store|keep in mind)\\b/i.test(latestUserMessage)) {
+      return "I only save facts when you explicitly ask me to remember or save them.";
+    }
+    if (call.function.name === "forget" && !/\\b(forget|delete|remove|erase)\\b/i.test(latestUserMessage)) {
+      return "I only delete saved facts when you explicitly ask me to forget or delete them.";
     }
 
     switch (call.function.name) {
