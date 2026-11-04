@@ -58,6 +58,10 @@ The shortcuts are removed on approval, denial, timeout, cancellation, and window
 
 The assistant window briefly transitions into a small observing indicator while a screen frame is captured. Desktop actions temporarily pass mouse events through the transparent Electron window. This avoids click interception while keeping automation visible to the user.
 
+## Explicit local memory
+
+Orvane can store short facts or preferences only when the user explicitly asks it to remember them. The model accesses this store through separate remember, recall, and forget tools; these operations do not grant desktop-control permissions. Memory is stored as a bounded JSON file in the application's user-data directory, with atomic replacement and user-only file permissions. The store keeps at most 100 entries and limits each entry to 1,200 characters. Recalled entries are untrusted context and never override system or current-user instructions. A memory is deleted by exact entry ID after it has been recalled.
+
 ## Cancellation
 
 Each chat request owns an `AbortController`. Stopping a task aborts the current HTTP request, cancels pending approvals, interrupts explicit waits, and prevents further tool-loop iterations. Native mouse or keyboard operations already in progress may finish before cancellation is observed.
