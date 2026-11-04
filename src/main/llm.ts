@@ -200,7 +200,6 @@ export class ModelClient {
           model: settings.model,
           messages,
           tools: TOOLS,
-          tool_choice: "auto",
           temperature: 0.2,
           max_tokens: settings.maxOutputTokens,
         }),
