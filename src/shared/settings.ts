@@ -5,7 +5,7 @@ export function sanitizeSettings(value: Partial<AppSettings> | null | undefined)
   const baseUrl = cleanUrl(value?.baseUrl ?? DEFAULT_SETTINGS.baseUrl);
   const model = String(value?.model ?? DEFAULT_SETTINGS.model).trim() || DEFAULT_SETTINGS.model;
   const maxToolSteps = Math.min(30, Math.max(1, Math.round(Number(value?.maxToolSteps) || DEFAULT_SETTINGS.maxToolSteps)));
-  const maxOutputTokens = Math.min(8_192, Math.max(256, Math.round(Number(value?.maxOutputTokens) || DEFAULT_SETTINGS.maxOutputTokens)));
+  const maxOutputTokens = Math.min(4_096, Math.max(256, Math.round(Number(value?.maxOutputTokens) || DEFAULT_SETTINGS.maxOutputTokens)));
   const permissionMode = value?.permissionMode === "automatic"
     ? "automatic"
     : value?.permissionMode === "ask"
