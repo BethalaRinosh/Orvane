@@ -9,6 +9,11 @@ describe("sanitizeSettings", () => {
     expect(DEFAULT_SETTINGS.maxOutputTokens).toBe(1_024);
   });
 
+  it("migrates the previous bundled 9B model to the 4B laptop default", () => {
+    expect(sanitizeSettings({ model: "RedHatAI/Qwen3.5-9B-quantized.w4a16" }).model)
+      .toBe("RedHatAI/Qwen3.5-4B-quantized.w4a16");
+  });
+
   it("normalizes URLs and clamps tool steps", () => {
     const settings = sanitizeSettings({
       providerMode: "remote",
