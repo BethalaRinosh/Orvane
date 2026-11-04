@@ -378,8 +378,14 @@ export class DesktopAutomation {
         : source.thumbnail;
 
       this.lastCapture = { targetLeft, targetTop, targetWidth, targetHeight };
-      const { width: resultWidth, height: resultHeight } = image.getSize();
-      const imageDataUrl = `data:image/jpeg;base64,${image.toJPEG(region ? 86 : 76).toString("base64")}`;
+      // Keep vision input small enough for local models with modest context windows.
+      // Coordinates continue to map to the original display bounds above; only the
+      // image sent to the model is downscaled.
+      const modelImage = image.getSize().width > 768
+        ? image.resize({ width: 768, quality: "good" })
+        : image;
+      const { width: resultWidth, height: resultHeight } = modelImage.getSize();
+      const imageDataUrl = `data:image/jpeg;base64,${modelImage.toJPEG(region ? 72 : 68).toString("base64")}`;
       return {
         text: `${region ? "Desktop region" : "Primary desktop"} captured at ${resultWidth}x${resultHeight}. Treat this returned image as a fresh normalized 1000x1000 grid: top-left=(0,0), center=(500,500), bottom-right=(1000,1000).`,
         imageDataUrl,

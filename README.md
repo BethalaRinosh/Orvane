@@ -31,7 +31,8 @@ Run it privately with a local vision-language model through [vLLM](https://docs.
 - Fresh visual verification after every desktop action.
 - **Ask first** and **Automatic** desktop permission modes.
 - `Enter` to approve and `Delete`/`Backspace` to deny without stealing focus from the target application.
-- A stop control that cancels model generation, waits, and pending approvals.\n- Explicit local memory: remember, recall, and forget non-sensitive facts on request, without silently storing chat history.
+- A stop control that cancels model generation, waits, and pending approvals.
+- Explicit local memory: remember, recall, and forget non-sensitive facts on request, without silently storing chat history.
 - Clarifying questions when the model needs information instead of guessing.
 - Linux AppImage/deb, Windows NSIS, and macOS DMG build targets.
 

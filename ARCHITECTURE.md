@@ -26,7 +26,8 @@ The preload script exposes typed IPC operations defined in `src/shared/contracts
 - `main.ts` creates services and manages process lifecycle.
 - `window.ts` owns the transparent always-on-top window and primary-display positioning.
 - `ipc.ts` validates renderer requests and owns cancellable chat tasks.
-- `store.ts` persists validated settings with user-only file permissions.\n- `memory.ts` stores only explicitly requested, non-sensitive user facts in a bounded local JSON store with atomic writes.
+- `store.ts` persists validated settings with user-only file permissions.
+- `memory.ts` stores only explicitly requested, non-sensitive user facts in a bounded local JSON store with atomic writes.
 - `llm.ts` implements the OpenAI-compatible multimodal tool loop.
 - `automation.ts` captures the desktop, maps visual coordinates, brokers approval, and performs input actions.
 
@@ -42,7 +43,11 @@ The preload script exposes typed IPC operations defined in `src/shared/contracts
 8. Previous images/tool rounds become a compact action ledger; only the newest image is retained.
 9. The loop ends on a final response, cancellation, clarification, error, or configured step limit.
 
-## Persistent memory\n\nOrvane does not silently mine chat history. The model can save a non-sensitive fact only when the user explicitly asks it to remember or save that fact. Memory is stored in the per-user application-data directory, supports relevant keyword recall and exact-key deletion, and is bounded to 500 entries. Corrupt files fail closed and are not overwritten. Memory operations do not grant or change desktop permissions.\n\n## Visual coordinate system
+## Persistent memory
+
+Orvane does not silently mine chat history. The model can save a non-sensitive fact only when the user explicitly asks it to remember or save that fact. Memory is stored in the per-user application-data directory, supports relevant keyword recall and exact-key deletion, and is bounded to 500 entries. Corrupt files fail closed and are not overwritten. Memory operations do not grant or change desktop permissions.
+
+## Visual coordinate system
 
 Qwen computer-use coordinates are represented on a normalized `0..1000` grid. Orvane maps the most recently returned image into Electron's primary-display bounds and then into the native automation coordinate space.
 
