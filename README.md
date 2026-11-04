@@ -6,7 +6,7 @@
 
 Orvane is an open-source, local-first computer-use agent for Linux, Windows, and macOS. It lives in a small desktop orb, expands into a chat panel, understands the screen, and can operate applications with the same basic interactions as a person.
 
-Run it privately with a local vision-language model through [vLLM](https://docs.vllm.ai/), or connect any compatible hosted API. The default configuration uses `RedHatAI/Qwen3.5-9B-quantized.w4a16`, selected to fit a useful multimodal agent loop on many 16 GB GPUs.
+Run it privately with a local vision-language model through [vLLM](https://docs.vllm.ai/), or connect any compatible hosted API. The default configuration uses `RedHatAI/Qwen3.5-4B-quantized.w4a16`, a smaller multimodal checkpoint intended as a more realistic starting point for 8 GB laptop GPUs.
 
 > [!WARNING]
 > Orvane is experimental software with the ability to control your mouse and keyboard. Keep **Ask first** enabled, supervise actions, and do not use it around sensitive or irreversible workflows without understanding the risks.
@@ -91,10 +91,10 @@ npm install
 
 The included launcher expects a vLLM environment at `~/venvs/vllm`. Qwen3.5 requires a recent vLLM release (use vLLM 0.17.0 or newer). vLLM is intended to run in Linux; on Windows, use WSL2 with a supported NVIDIA CUDA setup rather than trying to install the vLLM server natively in PowerShell.
 
-The server context window defaults to 8192 tokens. Qwen3.5 is launched in non-thinking mode to keep its response budget available for answers and desktop tool calls. Set `ORVANE_MAX_MODEL_LEN` before launching to change it, then restart the model server. This is a local GPU-memory/context setting, not a paid token quota:
+The server context window defaults to 4096 tokens for an 8 GB GPU. The launcher defaults to the 4B W4A16 checkpoint and reserves GPU memory conservatively. Qwen3.5 is launched in non-thinking mode to keep its response budget available for answers and desktop tool calls. Screenshot capture is downscaled to 1280×720 to reduce vision-token usage. Increase context only after checking free VRAM and confirming the server can allocate its KV cache. This is a local GPU-memory/context setting, not a paid token quota:
 
 ```bash
-ORVANE_MAX_MODEL_LEN=8192 npm run model:start
+ORVANE_MAX_MODEL_LEN=4096 npm run model:start
 ```
 
 From Windows PowerShell, start your configured WSL distribution and run the Linux launcher inside it, for example:
@@ -128,7 +128,7 @@ vllm serve RedHatAI/Qwen3.5-9B-quantized.w4a16 \
   --tool-call-parser qwen3_coder
 ```
 
-Start at an `8192` context on a 16 GB GPU. If memory allows, increase it to `16384`. Model support and licensing are documented separately by the [checkpoint author](https://huggingface.co/RedHatAI/Qwen3.5-9B-quantized.w4a16); the repository's MIT license does not relicense model weights.
+Start at `4096` context on an 8 GB laptop GPU. The 4B W4A16 checkpoint is approximately 5.2 GB on disk; actual runtime VRAM also includes the vision encoder, CUDA/vLLM overhead, and KV cache, so available memory varies by laptop and display/GPU load. If the model does not load, close GPU-heavy applications and check `nvidia-smi` before trying a smaller model or a lower context. Do not switch back to the 9B checkpoint on an 8 GB GPU expecting it to run comfortably. Model support and licensing are documented separately by the [checkpoint author](https://huggingface.co/RedHatAI/Qwen3.5-4B-quantized.w4a16); the repository's MIT license does not relicense model weights.
 
 ### 3. Start Orvane
 
